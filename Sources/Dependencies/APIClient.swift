@@ -6,6 +6,7 @@ public struct APIClient: Sendable {
     public var createTodo: @Sendable (String) async throws -> Todo
     public var updateTodo: @Sendable (Todo) async throws -> Todo
     public var deleteTodo: @Sendable (UUID) async throws -> Void
+    public var register: @Sendable (String, String) async throws -> Void
 }
 
 extension APIClient: DependencyKey {
@@ -21,6 +22,9 @@ extension APIClient: DependencyKey {
         },
         deleteTodo: { _ in
             throw APIClientError.notImplemented
+        },
+        register: { _, _ in
+            throw APIClientError.notImplemented
         }
     )
 
@@ -28,7 +32,8 @@ extension APIClient: DependencyKey {
         fetchTodos: { [] },
         createTodo: { title in Todo(title: title) },
         updateTodo: { todo in todo },
-        deleteTodo: { _ in }
+        deleteTodo: { _ in },
+        register: { _, _ in }
     )
 }
 
@@ -44,4 +49,5 @@ public enum APIClientError: Error {
     case networkError(Error)
     case decodingError(Error)
     case unauthorized
+    case duplicateEmail
 }
