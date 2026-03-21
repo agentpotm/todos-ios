@@ -58,4 +58,22 @@ struct TodoListFeatureTests {
             $0.errorMessage = "Failed to load todos."
         }
     }
+
+    @Test
+    func deleteTodoRemovesItImmediately() async {
+        let id1 = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+        let id2 = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
+        let todos = [
+            Todo(id: id1, title: "Buy groceries"),
+            Todo(id: id2, title: "Write tests"),
+        ]
+        let store = TestStore(initialState: TodoListFeature.State(todos: todos)) {
+            TodoListFeature()
+        } withDependencies: {
+            $0.apiClient.deleteTodo = { _ in }
+        }
+        await store.send(.deleteTodo(id: id1)) {
+            $0.todos = [todos[1]]
+        }
+    }
 }

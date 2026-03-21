@@ -24,6 +24,7 @@ public struct TodoListFeature {
         case onAppear
         case todosLoaded([Todo])
         case todosLoadFailed
+        case deleteTodo(id: UUID)
     }
 
     @Dependency(\.apiClient) var apiClient
@@ -54,6 +55,12 @@ public struct TodoListFeature {
                 state.isLoading = false
                 state.errorMessage = "Failed to load todos."
                 return .none
+
+            case let .deleteTodo(id):
+                state.todos.removeAll { $0.id == id }
+                return .run { _ in
+                    try? await apiClient.deleteTodo(id)
+                }
             }
         }
     }

@@ -29,6 +29,13 @@ public struct TodoListView: View {
             } else {
                 List(store.todos) { todo in
                     Text(todo.title)
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                store.send(.deleteTodo(id: todo.id))
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                 }
             }
         }
