@@ -11,8 +11,7 @@ public struct AppView: View {
     public var body: some View {
         NavigationStack {
             if store.isAuthenticated {
-                Text("Dashboard")
-                    .navigationTitle("Todos")
+                TodoListView(store: store.scope(state: \.todoList, action: \.todoList))
                     .toolbar {
                         ToolbarItem(placement: .automatic) {
                             Button("Sign Out") {
