@@ -9,28 +9,44 @@ public struct TodoListView: View {
     }
 
     public var body: some View {
-        Group {
-            if store.isLoading {
-                ProgressView()
-            } else if let errorMessage = store.errorMessage {
-                VStack {
-                    Text("Error")
-                        .font(.headline)
-                    Text(errorMessage)
-                        .foregroundStyle(.secondary)
+        VStack(spacing: 0) {
+            HStack {
+                TextField("New todo", text: Binding(
+                    get: { store.newTodoTitle },
+                    set: { store.send(.newTodoTitleChanged($0)) }
+                ))
+                .textFieldStyle(.roundedBorder)
+                Button("Add") {
+                    store.send(.submitTapped)
                 }
-            } else if store.todos.isEmpty {
-                VStack {
-                    Text("No Todos")
-                        .font(.headline)
-                    Text("You have no todos yet.")
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                List(store.todos) { todo in
-                    Text(todo.title)
+                .disabled(store.newTodoTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            .padding()
+
+            Group {
+                if store.isLoading {
+                    ProgressView()
+                } else if let errorMessage = store.errorMessage {
+                    VStack {
+                        Text("Error")
+                            .font(.headline)
+                        Text(errorMessage)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if store.todos.isEmpty {
+                    VStack {
+                        Text("No Todos")
+                            .font(.headline)
+                        Text("You have no todos yet.")
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    List(store.todos) { todo in
+                        Text(todo.title)
+                    }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationTitle("Todos")
         .onAppear {

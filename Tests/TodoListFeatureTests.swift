@@ -58,4 +58,61 @@ struct TodoListFeatureTests {
             $0.errorMessage = "Failed to load todos."
         }
     }
+
+    @Test
+    func submitTappedWithNonEmptyTitleAddsTodoAndClearsInput() async {
+        let newTodo = Todo(id: UUID(uuidString: "00000000-0000-0000-0000-000000000010")!, title: "Buy milk")
+        let store = TestStore(
+            initialState: TodoListFeature.State(newTodoTitle: "Buy milk")
+        ) {
+            TodoListFeature()
+        } withDependencies: {
+            $0.apiClient.fetchTodos = { [] }
+            $0.apiClient.createTodo = { _ in newTodo }
+        }
+        await store.send(.submitTapped)
+        await store.receive(\.todoAdded) {
+            $0.todos = [newTodo]
+            $0.newTodoTitle = ""
+        }
+    }
+
+    @Test
+    func submitTappedWithEmptyTitleDoesNothing() async {
+        let store = TestStore(
+            initialState: TodoListFeature.State(newTodoTitle: "")
+        ) {
+            TodoListFeature()
+        } withDependencies: {
+            $0.apiClient.fetchTodos = { [] }
+            $0.apiClient.createTodo = { _ in Todo(title: "Should not be called") }
+        }
+        await store.send(.submitTapped)
+        // No effects should fire — TestStore will fail if unexpected actions arrive
+    }
+
+    @Test
+    func submitTappedWithWhitespaceOnlyTitleDoesNothing() async {
+        let store = TestStore(
+            initialState: TodoListFeature.State(newTodoTitle: "   ")
+        ) {
+            TodoListFeature()
+        } withDependencies: {
+            $0.apiClient.fetchTodos = { [] }
+            $0.apiClient.createTodo = { _ in Todo(title: "Should not be called") }
+        }
+        await store.send(.submitTapped)
+    }
+
+    @Test
+    func titleChangedUpdatesState() async {
+        let store = TestStore(initialState: TodoListFeature.State()) {
+            TodoListFeature()
+        } withDependencies: {
+            $0.apiClient.fetchTodos = { [] }
+        }
+        await store.send(.newTodoTitleChanged("New task")) {
+            $0.newTodoTitle = "New task"
+        }
+    }
 }
