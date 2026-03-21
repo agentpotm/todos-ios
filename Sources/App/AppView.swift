@@ -9,13 +9,19 @@ public struct AppView: View {
     }
 
     public var body: some View {
-        Group {
+        NavigationStack {
             if store.isAuthenticated {
                 Text("Dashboard")
                     .navigationTitle("Todos")
+                    .toolbar {
+                        ToolbarItem(placement: .automatic) {
+                            Button("Sign Out") {
+                                store.send(.login(.logoutButtonTapped))
+                            }
+                        }
+                    }
             } else {
-                Text("Login")
-                    .navigationTitle("Sign In")
+                LoginView(store: store.scope(state: \.login, action: \.login))
             }
         }
         .onAppear {
